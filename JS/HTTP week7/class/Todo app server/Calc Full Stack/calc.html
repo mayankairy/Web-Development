@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <script>
+            async function add(){
+                const a=document.getElementById("first").value;
+                const b=document.getElementById("second").value;
+
+                const res=await fetch("http://localhost:3002/add/"+ a+"/" +b);
+                const json=await res.json();
+                document.getElementById("response").innerHTML=json.ans;
+
+            }
+                // function add(){                          // when needed in backend
+                //     const a=document.getElementById("first").value;
+                //     const b=document.getElementById("second").value;
+
+                //     document.getElementById("response").innerHTML=parseInt(a)+parseInt(b);
+
+                // }
+
+            async function sub(){
+                    const a=document.getElementById("first").value;
+                    const b=document.getElementById("second").value;
+
+                    const res=await fetch("http://localhost:3002/sub/" +a+"/"+b);
+                    const json=await res.json();
+                    document.getElementById("response").innerHTML=json.ans;
+                }
+
+            async function multiply(){
+                    const a=document.getElementById("first").value;
+                    const b=document.getElementById("second").value;
+
+                    const res=await fetch("http://localhost:3002/multiply/"+a+"/"+b);
+                    const json=await res.json();
+                   // console.log(json);    // O/P= { ans : 50}
+                    document.getElementById("response").innerHTML=json.ans;
+                }
+
+            async function divide(){
+                    const a=document.getElementById("first").value;
+                    const b=document.getElementById("second").value;
+
+                    const res=await fetch("http://localhost:3002/divide/"+a +"/"+b);
+                    const json=await res.json();
+                    document.getElementById("response").innerHTML=json.ans;
+                }
+        </script>
+    </head>
+    <body>
+        <input id="first" type="text" placeholder="first number">
+        <input id="second" type="text" placeholder="second number">
+
+
+        <button onclick="add()">add</button>
+        <button onclick="sub()">sub</button>
+        <button onclick="multiply()">multiply</button>
+        <button onclick="divide()">divide</button>
+        
+         <div id="response"></div>    <!--where we will get our answers -->
+    </body>
+</html>
