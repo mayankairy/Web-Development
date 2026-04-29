@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lan="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator App</title>
+        <!-- <script src="./script.js" defer></script> -->
+         <script>
+            console.log("hi using script")
+            async function sum(){
+                const a=document.getElementById("first").value;
+                const b=document.getElementById("second").value;
+
+                const res=await fetch("http://localhost:3003/sum/", {
+                    method: "POST",
+                    headers:{
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        a:a,
+                        b:b
+                    })
+                });
+                const json=await res.json();
+                document.getElementById("response").innerHTML=json.ans;
+            }
+
+            async function sub(){
+                const a=document.getElementById("first").value;
+                const b=document.getElementById("second").value;
+
+                const res=await fetch("http://localhost:3003/sub/" ,{
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        a:a,
+                        b:b
+                    })
+                })
+                const json=await res.json();
+                document.getElementById("response").innerHTML=json.ans;
+            }
+
+            async function multiply(){
+                const a=document.getElementById("first").value;
+                const b=document.getElementById("second").value;
+
+                const res=await fetch("http://localhost:3003/multiply/" , {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":"application/json"
+                    },
+                    body: JSON.stringify({
+                        a:a,
+                        b:b
+                    })
+                })
+                const json=await res.json();
+                document.getElementById("response").innerHTML=json.ans;
+            }
+
+            async function divide(){
+                const a=document.getElementById("first").value;
+                const b=document.getElementById("second").value;
+
+                const res=await fetch("http://localhost:3003/divide/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":"application/json"
+                    },
+                    body: JSON.stringify({
+                        a:a,
+                        b:b
+                    })
+                })
+                const json=await res.json();
+                document.getElementById("response").innerHTML=json.ans;
+            }
+         </script>
+    </head>
+
+    <body>
+        
+            <input id="first" type="number" placeholder="first number">
+            <input id="second" type="number" placeholder="second number">
+
+            <button onclick="sum()"> sum </button>
+            <button onclick="sub()"> sub </button>
+            <button onclick="multiply()"> multiply </button>
+            <button onclick="divide()"> divide </button>
+        
+
+        <div id="response"></div>
+    </body>
+</html>
