@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+ <html lan="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Notes app</title>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="icon" href="data:,">
+
+    </head>
+
+    <body>
+        <div style="display:flex; justify-content:space-between; padding: 0px 100px">
+            <div id="notes">
+                Loading...
+            </div>
+
+            <div>
+                <div>
+                <input id="userNote"></input>
+                <button onclick="addTodo()">Create Note</button>
+                </div>
+                <hr>
+                <div>
+                    <input id="userDelete" />
+                    <button onclick="deleteNote()">delete Note</button>
+                </div>
+            </div>
+        </div>
+
+            <script>
+                let count=0;
+                 async function addTodo(){
+                    count++;
+                    await axios.post("http://localhost:3004/notes", {
+                        note: document.getElementById("userNote").value
+                    })
+
+                    // now show it in frontend
+                    const newNote=document.createElement("div");
+                    newNote.innerHTML=document.getElementById("userNote").value;
+                    newNote.setAttribute("style", 'border:1px 1px solid black', "padding:0px 1px");
+                    document.getElementById("notes").appendChild(newNote);
+
+                    document.getElementById("userNote").value="";
+
+                    // give id to note for deletion
+                    newNote.setAttribute('id', count);                
+
+                }
+
+                async function deleteNote(){
+                   // alert("you sure")
+                   const removeNote=document.getElementById("userDelete").value;
+                    await axios.delete("http://localhost:3004/notes", {
+                        headers:{
+                            Authorization:"Bearer YOUR_TOKEN"
+                        },
+                        data:{
+                            count: removeNote,
+                            reason: "you asked"
+                        }
+                    })
+
+                    // now show it in frontend
+                    const element=document.getElementById(removeNote); // says Go find the HTML element whose ID matches the number the user just typed.
+                    if(element){
+                        element.remove();
+                    }
+                    else{
+                        alert("wrong id");
+                    }
+
+                }
+
+                async function getTodos(){
+                    const response=await axios.get("http://localhost:3004/notes");
+                    const notes=response.data.notes;
+                }
+                //remove that Loading...
+                document.getElementById("notes").innerHTML="";
+
+                for(let i=0;i<notes.length;i++){
+                    const Unote=document.createElement("div");
+                    Unote.innerHTML=notes[i];
+                    Unote.setAttribute("style", "border:1px 1px solid black; padding:0px 1px");
+                    document.getElementById("notes").appendChild(Unote);
+                }
+                getTodos();
+            </script>
+    </body>
+ </html>
