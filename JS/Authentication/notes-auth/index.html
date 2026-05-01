@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lan="en">
+    <head>
+        <meta name="viewport" content="width=device-width" initial-scale="1.0">
+        <title>Your Landing</title>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+         <!-- Cannot GET /favicon.ico ,this issue -->
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    </head>
+
+    <body>
+        <div style="display:flex; justify-content:space-between; padding: 0px 100px">
+            <div id="notes">
+                Loading...
+            </div>
+
+            <div>
+                <div>
+                <input id="userNote"></input>
+                <button onclick="addTodo()">Create Note</button>
+                </div>
+                <hr>
+                <div>
+                    <input id="userDelete" />
+                    <button onclick="deleteNote()">delete Note</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            async function addTodo(){
+                const userNote=document.getElementById("userNote").value;
+                await axios.post("http://localhost:3005/notes", 
+                    {note: userNote} , 
+                    {
+                        headers:{
+                            token: localStorage.getItem("token")
+                        }}
+                )
+
+                const newNote=document.createElement("div");
+                newNote.innerHTML=userNote;
+                newNote.setAttribute("style", "border: 2px 2px solid black; padding:1px")
+                document.getElementById("notes").appendChild(newNote);
+
+                //now clear input box
+                document.getElementById("userNote").value="";
+
+            }
+
+            async function deleteNote(){
+                
+            }
+
+
+            async function getTodos(){
+                const response=await axios.get("http://localhost:3005/notes", 
+                    {
+                        headers: {
+                            token: localStorage.getItem("token")
+                    }}
+                );
+                const notes=response.data.notes;
+
+                //remove the loading... and load all notes
+                document.getElementById("notes").innerHTML="";
+                for(let i=0;i<notes.length;i++){
+                    const Unote=document.createElement("div");
+                    Unote.innerHTML=notes[i].note;
+                    Unote.setAttribute("style", "border: 2px 2px solid black; padding:1px")
+                    document.getElementById("notes").appendChild(Unote);
+                }
+            }
+            getTodos();
+        </script>
+    </body>
+</html>
