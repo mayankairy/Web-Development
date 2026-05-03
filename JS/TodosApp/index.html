@@ -1,0 +1,146 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewpoint" content="width=device-width" initial-scale="1.0">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+        <script>
+            async function addT(){
+                const token=localStorage.getItem("token");
+                const todo=document.getElementById("addtodo").value;
+                try{
+                    const response=await axios.post("http://localhost:3000/todos",
+                        {
+                            todo:todo
+                        }, {
+                            headers:{token:token}
+                        }
+                    )
+
+                    const {todoId, todo}=response.data;
+                     // show in frontend
+                const newt=document.createElement("div");
+                newt.innerHTML=`<span>#${todoId}</span> ${todo}`;
+                newt.setAttribute("style","border: 2px 2px solid black; padding:1px");
+                document.getElementById("viewTodos").appendChild(newt);
+
+                document.getElementById("addtodo").value="";
+                }
+                catch(e){
+                    alert("corrupted token");
+                }
+               
+            }
+
+            async function deleteT(){
+                const token=localStorage.getItem("token");
+                const removetodo=document.getElementById("todoid").value;
+                try{
+                    const response=await axios.delete("http://localhost:3000/todos",{
+                        headers:{
+                            Authorization:"Bearer "+token
+                        }, data:{
+                            todo:removetodo
+                        }
+                    })
+                }
+                catch(e){
+                    alert("corrupted token");
+                }
+
+                //show it in frontend
+                //const element=document.getElementById(todoid).value;  // its a string like "5"
+                const element=document.getElementById(removetodo);    // here its like <div id="5">
+                if(element){          // element can't remove string, it need element i.e. through id
+                    element.remove();
+                }
+                else{
+                    alert("wrong id");
+                }
+            }
+
+            async function updateT(){
+                const token=localStorage.getItem("token");
+                const upId=document.getElementById("updateid").value;
+                const upTodo=document.getElementById("updatetodo").value;
+                try{
+                    const response=await axios.put("http://localhost:3000/todos", {
+                        todoId:upId,
+                        todo:upTodo
+                    },{
+                        headers:{
+                            Authorization:"Bearer "+token
+                        }
+                    })
+
+                    const {todoId, todo}=response.data;
+                    const container=document.getElementById("viewTodos");
+                    const todoelement=document.createElement("div");
+                    todoelement.innerHTML=`<small>ID: ${todoId}</small<p>${todo}</p>`;
+                    container.appendChild(todoelement);
+
+                }
+                catch(e){
+                    alert("wrong");
+                }
+            }
+
+            async function getTodo(){
+                axios.get('http://localhost:3000/todos')
+                 .then(response => {
+                 // Axios puts the parsed JSON directly into response.data
+                    const { todoId, todo } = response.data;
+                    
+                    const container = document.getElementById('viewTodos');
+
+                    // 3. Create a new element (e.g., a <div> or <li>)
+                    const todoElement = document.createElement('div');
+                    todoElement.className = "todo-card"; // Add a class for styling
+
+                    // 4. Set the content using the data from your backend
+                    todoElement.innerHTML = `
+                    <small>ID: ${todoId}</small>
+                    <p>${todo}</p>
+                    `;
+
+                    // 5. Add it to the page
+                    container.appendChild(todoElement);
+                })
+                .catch(error => console.error("Error fetching todo:", error)); 
+
+              
+            }
+            getTodo();
+        </script>
+    </head>
+
+    <body>
+        <div style="display:grid; grid-template-columns:1fr 2fr">
+            <div id="addTodos" style="display:flex;justify-content:center;align-items:center">
+                <!-- all options to add, delete and update -->
+                 <div>
+                    <textarea id="todo" placeholder="Todo"></textarea>
+                 </div>
+                 <div>
+                    <button id="addtodo" onclick="addT()">Add</button>
+                 </div>
+                 <div>
+                    <input id="todoid" type="number" placeholder="id" />
+                    <button id="deletetodo" onclick="deleteT()">Delete</button>
+                 </div>
+
+                 <div>
+                    <input id="updateid" type="number" placeholder="id"/>
+                    <input id="updatetodo" type="text" placeholder="update-todo" />
+                    <button onclick="updateT()">Update</button>
+                 </div>
+            </div>
+            <div id="viewTodos" style="display:flex;justify-content:center;align-items:center">
+                <!-- all todos will be here, in center -->
+
+            </div>
+        </div>
+    </body>
+</html>
