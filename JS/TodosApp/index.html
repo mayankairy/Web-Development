@@ -1,144 +1,166 @@
-<!DOCTYPE HTML>
-<html>
+<!DOCTYPE html>
+<html lan="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewpoint" content="width=device-width" initial-scale="1.0">
+        <meta name="viewport" content="width=device-width" initial-scale="1.0">
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-
         <script>
-            async function addT(){
+            async function addTodo(){
                 const token=localStorage.getItem("token");
-                const todo=document.getElementById("addtodo").value;
+                const textTodo=document.getElementById("inputTodo").value;
                 try{
-                    const response=await axios.post("http://localhost:3000/todos",
-                        {
-                            todo:todo
-                        }, {
-                            headers:{token:token}
-                        }
-                    )
+                    const response=await axios.post("http://localhost:3000/todos",{
+                        todo:textTodo},{headers:{authorization:token}})
 
-                    const {todoId, todo}=response.data;
-                     // show in frontend
-                const newt=document.createElement("div");
-                newt.innerHTML=`<span>#${todoId}</span> ${todo}`;
-                newt.setAttribute("style","border: 2px 2px solid black; padding:1px");
-                document.getElementById("viewTodos").appendChild(newt);
+                    const {todoId,todo}=response.data;
 
-                document.getElementById("addtodo").value="";
+                    const container=document.getElementById("viewTodos");   // parentDiv
+
+                    const addText=document.createElement("div");
+                    addText.id=`todo-${todoId}`;
+                    // addText.setAttribute("id",'todo-', todoId);
+                    addText.textContent=`${todoId} ${todo}`;
+
+                    container.appendChild(addText);
+
+                    document.getElementById("inputTodo").value=""; 
                 }
                 catch(e){
-                    alert("corrupted token");
+                    alert("invalid token");
+                    console.error(e);
                 }
-               
             }
 
-            async function deleteT(){
+            async function deleteTodo(){
                 const token=localStorage.getItem("token");
-                const removetodo=document.getElementById("todoid").value;
+                const removeTodo=document.getElementById("deleteTodo").value;
                 try{
                     const response=await axios.delete("http://localhost:3000/todos",{
-                        headers:{
-                            Authorization:"Bearer "+token
-                        }, data:{
-                            todo:removetodo
-                        }
+                        headers:{authorization:token},
+                        data:{todoId:removeTodo}
                     })
-                }
-                catch(e){
-                    alert("corrupted token");
+
+                    // wrong code
+                     const container=document.getElementById("viewTodos");
+                    // const element=document.getElementById(`todo-${removeTodo}`);
+                    // container.removeChild(element);
+                    // document.gotElementById("deleteTodo").value="";
+
+                    // You MUST check if the element exists before asking the container to remove it
+                    const element = document.getElementById(`todo-${removeTodo}`);
+                    if (element && container) {
+                        container.removeChild(element);
+                    }
+                    document.getElementById("deleteTodo").value="";
                 }
 
-                //show it in frontend
-                //const element=document.getElementById(todoid).value;  // its a string like "5"
-                const element=document.getElementById(removetodo);    // here its like <div id="5">
-                if(element){          // element can't remove string, it need element i.e. through id
-                    element.remove();
-                }
-                else{
-                    alert("wrong id");
+                catch(e){
+                    alert("invalid token");
+                    console.error(e);
                 }
             }
 
-            async function updateT(){
+            async function updateTodo(){
                 const token=localStorage.getItem("token");
-                const upId=document.getElementById("updateid").value;
-                const upTodo=document.getElementById("updatetodo").value;
+                const inputTodoText=document.getElementById("updateTodo").value;
+                const inputTodoId=document.getElementById("upTodoId").value;
                 try{
-                    const response=await axios.put("http://localhost:3000/todos", {
-                        todoId:upId,
-                        todo:upTodo
-                    },{
-                        headers:{
-                            Authorization:"Bearer "+token
-                        }
-                    })
+                    const response= await axios.put("http://localhost:3000/todos",{
+                        todoId:inputTodoId,
+                        todo:inputTodoText
+                    }, {headers:{authorization:token}})
 
                     const {todoId, todo}=response.data;
-                    const container=document.getElementById("viewTodos");
-                    const todoelement=document.createElement("div");
-                    todoelement.innerHTML=`<small>ID: ${todoId}</small<p>${todo}</p>`;
-                    container.appendChild(todoelement);
 
+                    // wrong code- creating a new div rather than updating one
+                    // const container=document.getElementById("viewTodos");
+                    // const upTodo=document.createElement("div");
+
+                    // upTodo.id=`todo-${todoId}`;
+                    // upTodo.textContent=`${todoId} ${todo}`;
+                   
+                    // container.appendChild(upTodo);
+
+                    const existingTodo=document.getElementById(`todo-${todoId}`);
+                    if(existingTodo){
+                        existingTodo.textContent=`${todoId} ${todo}`;
+                    }
+
+                    document.getElementById("updateTodo").value="";
+                    document.getElementById("upTodoId").value="";
                 }
                 catch(e){
-                    alert("wrong");
+                    alert("invalid token");
+                    console.error(e);
                 }
             }
 
             async function getTodo(){
-                axios.get('http://localhost:3000/todos')
-                 .then(response => {
-                 // Axios puts the parsed JSON directly into response.data
-                    const { todoId, todo } = response.data;
-                    
-                    const container = document.getElementById('viewTodos');
+                const token=localStorage.getItem("token");
+                try{
+                    const response=await axios.get("http://localhost:3000/todos",{
+                        headers:{authorization:token}
+                    });
 
-                    // 3. Create a new element (e.g., a <div> or <li>)
-                    const todoElement = document.createElement('div');
-                    todoElement.className = "todo-card"; // Add a class for styling
+                    const userTodos=response.data.userTodos;
 
-                    // 4. Set the content using the data from your backend
-                    todoElement.innerHTML = `
-                    <small>ID: ${todoId}</small>
-                    <p>${todo}</p>
-                    `;
+                    document.getElementById("viewTodos").innerHTML="";     // clears any existing todo
 
-                    // 5. Add it to the page
-                    container.appendChild(todoElement);
-                })
-                .catch(error => console.error("Error fetching todo:", error)); 
+                    for(let i=0;i<userTodos.length;i++){
+                       // const container=document.getElementById("viewTodos");
+                        const todos=document.createElement("div");
+                        todos.id=`todo-${userTodos[i].todoId}`;
+                        todos.textContent=`${userTodos[i].todoId} ${userTods[i].todo}`;
+                        //container.appendChild(todos);
+                        document.getElementById("viewTodos").appendChild(todos);
+                    }
 
-              
+                }
+                catch(e){
+                    alert("invalid token");
+                   // console.error(e);
+                   console.dir(e);
+                }
             }
             getTodo();
         </script>
+
     </head>
 
     <body>
-        <div style="display:grid; grid-template-columns:1fr 2fr">
-            <div id="addTodos" style="display:flex;justify-content:center;align-items:center">
-                <!-- all options to add, delete and update -->
-                 <div>
-                    <textarea id="todo" placeholder="Todo"></textarea>
-                 </div>
-                 <div>
-                    <button id="addtodo" onclick="addT()">Add</button>
-                 </div>
-                 <div>
-                    <input id="todoid" type="number" placeholder="id" />
-                    <button id="deletetodo" onclick="deleteT()">Delete</button>
-                 </div>
+        <div style="display:flex; justify-content:space-between">
+            <div id="tools">
+                <div>
 
-                 <div>
-                    <input id="updateid" type="number" placeholder="id"/>
-                    <input id="updatetodo" type="text" placeholder="update-todo" />
-                    <button onclick="updateT()">Update</button>
-                 </div>
+                    <div>
+                        <input id="inputTodo" type="text" placeholder="your todo" />
+                    </div>
+                    <div>
+                        <button onclick="addTodo()">Add</button>
+                    </div>
+
+                    <div>
+                        <input id="deleteTodo" type="text" placeholder="your todo id" />
+                    </div>
+                    <div>
+                        <button onclick="deleteTodo()">Delete</button>
+                    </div>
+
+                    <div>
+                        <input id="upTodoId" type="number" placeholder="your todo id" />
+                    </div>
+                    <div>
+                        <input id="updateTodo" type="text" placeholder="your todo" />
+                    </div>
+                    <div>
+                        <button onclick="updateTodo()">Update</button>
+                    </div>
+
+                </div>
             </div>
-            <div id="viewTodos" style="display:flex;justify-content:center;align-items:center">
-                <!-- all todos will be here, in center -->
+
+            <div id="viewTodos">
 
             </div>
         </div>
