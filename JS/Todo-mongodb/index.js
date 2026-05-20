@@ -2,6 +2,7 @@ const express=require('express');
 const {authMiddleware}=require('./middleware');
 const {todoModel, userModel}=require('./models');
 const jwt=require('jsonwebtoken');
+const mongoose=require('mongoose'); 
 const app=express();
 app.use(express.json());
 // let todos=[];
@@ -104,8 +105,9 @@ app.post('/todo',authMiddleware,async (req,res)=>{
 // }
 
 app.delete('/todo/:todoId',authMiddleware,async (req,res)=>{
+    try{
     const userId=req.userId;
-    const todoId=parseInt(req.params.todoId);
+    const todoId=req.params.todoId;
    // we are getting string from params
 
     // todos=todos.filter(f=>!(f.userId===userId && f.id===todoId));   // because we sent todoId as a variable id to frontend through json
@@ -121,25 +123,36 @@ app.delete('/todo/:todoId',authMiddleware,async (req,res)=>{
     //     todos=todos.filter(f=>!(f.userId===userId && f.todoId===todoId));
     //     // userId comes from token
     // }
+    if(!mongoose.isValidObjectId(todoId)){
+        return res.status(400).json({message:"wrong todoId"})
+    }
     const todoExists=await todoModel.findOne({
         userId:userId,
-        todoId:todoId
+        //todoId:todoId              // todoId is as variable _id in our db
+        _id:todoId
     })
     if(!todoExists){
-        res.status(403).json({
+        return res.status(403).json({
             message:"not your todo"
         })
-        return;
-    }else{
-        todos=await todoModel.deleteOne({
-            todoId:todoId,
-            userId:userId
-        })
     }
-
+    
+    await todoModel.deleteOne({
+        _id:todoId
+    })
+    
     res.json({
         message:"todo deleted"
     })
+ }
+catch (error) {
+    console.error("CRITICAL ERROR IN ROUTE:", error); 
+    
+    return res.status(500).json({ 
+        error: "Internal server error",
+        details: error.message 
+    });
+}
 })
 
 
