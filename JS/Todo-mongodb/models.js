@@ -15,7 +15,12 @@ const userSchema=new mongoose.Schema({
 })
 
 const todoSchema=new mongoose.Schema({
-    userId: mongoose.Types.ObjectId,
+   // userId: mongoose.Types.ObjectId,
+    // OR
+    userId:{
+        type:Number,
+        required:true
+    },
     title:String,
     description:String
 })

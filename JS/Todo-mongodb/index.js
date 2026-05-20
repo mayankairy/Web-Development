@@ -15,9 +15,9 @@ app.post('/signup',async (req,res)=>{
     const password=req.body.password;
     // userId +=1;
     // const newUId=userId;
-
     // const userExists=users.find(x=>x.username===username);
     //async operation
+
     const userExists=await userModel.findOne({
         username:username,
         password:password
@@ -59,15 +59,15 @@ app.post('/signin',async (req,res)=>{
         });
         return;
     }else{
-        const token=jwt.sign({userId:userExists.userId}, "secret123123");
-        //const token=jwt.sign({userId:newUId}, "secret123123");
+        //const token=jwt.sign({userId:userExists.userId}, "secret123123");
+        const token=jwt.sign({userId:userExists._id}, "secret123123");
         res.json({token});
     }
 })
 
 app.post('/todo',authMiddleware,async (req,res)=>{
     //const userId=req.userId;
-    const userId=req.user._id;
+    const userId=req.userId;
     const title=req.body.title;
     const description=req.body.description;
     // todoId+=1;
@@ -81,18 +81,29 @@ app.post('/todo',authMiddleware,async (req,res)=>{
     // })
 
     const newTodo=await todoModel.create({
-        userId:userId,
         title:title,
-        description:description
+        description:description,
+        //userId: new mongoose.Types.ObjectId(userId)                 // validation failed, because it is a 24 digit number but we were casting it to 6
+        // OR
+        userId:userId
     })
     res.json({
+        userId:userId,
         todoId: newTodo._id,
         message:"todo created"
     })
 
 })
 
-app.delete('/todo/:todoId',authMiddleware,(req,res)=>{
+// how it is stored in database
+// {
+//   "_id": ObjectId("664b2asdfrandom"),      // Captured in your code as newTodo._id
+//   "userId": ObjectId("66adfrandom"),  // Captured in your code from req.userId
+//   "title": "hello",
+//   "description": "checking 12, done!"
+// }
+
+app.delete('/todo/:todoId',authMiddleware,async (req,res)=>{
     const userId=req.userId;
     const todoId=parseInt(req.params.todoId);
    // we are getting string from params
@@ -110,10 +121,21 @@ app.delete('/todo/:todoId',authMiddleware,(req,res)=>{
     //     todos=todos.filter(f=>!(f.userId===userId && f.todoId===todoId));
     //     // userId comes from token
     // }
-    const todoExists=todoModel.findOne({
+    const todoExists=await todoModel.findOne({
         userId:userId,
         todoId:todoId
     })
+    if(!todoExists){
+        res.status(403).json({
+            message:"not your todo"
+        })
+        return;
+    }else{
+        todos=await todoModel.deleteOne({
+            todoId:todoId,
+            userId:userId
+        })
+    }
 
     res.json({
         message:"todo deleted"
@@ -121,11 +143,14 @@ app.delete('/todo/:todoId',authMiddleware,(req,res)=>{
 })
 
 
-app.get('/todo',authMiddleware,(req,res)=>{
+app.get('/todo',authMiddleware,async (req,res)=>{
     // all id's should be number because they come as a string!!
     const userId=req.userId;
     //const userTodos=todos.filter(u=>u.userId===userId);
-    const userTodos=todoModel.
+    const userTodos=await todoModel.find({
+        userId:userId
+    })
+    //find all todos maching userId
     res.json({
         todos:userTodos
     })

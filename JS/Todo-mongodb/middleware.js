@@ -3,9 +3,10 @@ const jwt=require("jsonwebtoken");
 function authMiddleware(req,res,next){
     const token=req.headers.token;
     const decoded=jwt.verify(token, "secret123123");
-    if(decoded.user._id){
-        //req.userId=parseInt(decoded.userId);
-        req.userId=decoded.user._id;
+    if(decoded.userId){
+        req.userId=parseInt(decoded.userId);
+        // not req.newUser._id - because we have that inside userId in our res.json in signup point
+        // newUser._id- is how to access it from the mongoDb. like newUser, inside that _id(object that) connect by .(dot)
         next();
     }
     else{
