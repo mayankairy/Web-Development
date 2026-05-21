@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express=require('express');
 const {authMiddleware}=require('./middleware');
 const {todoModel, userModel}=require('./models');
@@ -61,7 +62,9 @@ app.post('/signin',async (req,res)=>{
         return;
     }else{
         //const token=jwt.sign({userId:userExists.userId}, "secret123123");
-        const token=jwt.sign({userId:userExists._id}, "secret123123");
+        //const token=jwt.sign({userId:userExists._id}, "secret123123");
+        const token=jwt.sign({userId:userExists._id}, process.env.JWT_SECRET);
+        // we have defined over here that our id for user can be found with variable userId
         res.json({token});
     }
 })

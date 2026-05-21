@@ -1,5 +1,6 @@
 const mongoose=require('mongoose');
-mongoose.connect("");
+require('dotenv').config();
+mongoose.connect(process.env.MONGO_URL);
 // for all collection: create mongoose Schema and model object
 
 // let todos=[];
@@ -15,7 +16,7 @@ const userSchema=new mongoose.Schema({
 })
 
 const todoSchema=new mongoose.Schema({
-    userId: mongoose.Types.ObjectId,
+    userId: mongoose.Types.ObjectId,    // because of this we have variable userId in our todos collection, to access it anywhere
     // OR
     // userId:{
     //     type:Number,
